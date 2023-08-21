@@ -15,10 +15,12 @@ run_name: test
 
 # Model
 model:
-  name: hf_bert
+  name: mosaic_bert
   use_pretrained: false # Train the model from scratch. Set to true to start from the HF off-the-shelf weights.
   pretrained_model_name: ${tokenizer_name}
   tokenizer_name: ${tokenizer_name}
+  model_config:
+    softmax_n_param: 0.
 
 # Dataloaders
 train_loader:
@@ -65,8 +67,8 @@ optimizer:
   weight_decay: 0.0
 
 # Training duration and evaluation frequency
-max_duration: 2ba
-eval_interval: 2ba
+max_duration: 10ba
+eval_interval: 10ba
 eval_subset_num_batches: 20 # For code testing, evaluate on a subset of 20 batches
 global_train_batch_size: 16
 
