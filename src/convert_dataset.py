@@ -278,7 +278,7 @@ def _est_progress_denominator(total_samples: int,
 def build_dataloader(dataset, batch_size) -> DataLoader:
     # Multiple workers is only supported on linux machines
     if 'linux' in platform.platform().lower():
-        num_workers = min(8, dataset.hf_dataset.n_shards)  # type: ignore, changed to 8 from 64
+        num_workers = min(8, dataset.hf_dataset.n_shards)  # Changed to 8 from 64. type: ignore
         # If using multiple workers, configure each worker to prefetch as many samples as it can, up to
         # the aggregate device batch size
         # If not using workers, the torch DataLoader expects the default value for prefetch_factor,
