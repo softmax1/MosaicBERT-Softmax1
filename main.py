@@ -127,16 +127,6 @@ def build_dataloader(cfg, tokenizer, device_batch_size):
 
 
 def build_model(cfg: DictConfig):
-    """
-    if cfg.name == 'hf_bert':
-        return hf_bert_module.create_hf_bert_mlm(
-            pretrained_model_name=cfg.pretrained_model_name,
-            use_pretrained=cfg.get('use_pretrained', None),
-            model_config=cfg.get('model_config', None),
-            tokenizer_name=cfg.get('tokenizer_name', None),
-            gradient_checkpointing=cfg.get('gradient_checkpointing', None))
-    elif cfg.name == 'mosaic_bert':
-    """
     if cfg.name == 'mosaic_bert':
         return mosaic_bert_module.create_mosaic_bert_mlm(
             pretrained_model_name=cfg.pretrained_model_name,
@@ -205,6 +195,8 @@ def main(cfg: DictConfig,
 
     if cfg.get('run_name') is None:
         cfg.run_name = os.environ.get('COMPOSER_RUN_NAME', 'bert')
+
+    os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
     # Build the Trainer
     trainer = Trainer(
