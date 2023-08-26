@@ -2,7 +2,7 @@
 
 A test of the [Attention Is Off By One](https://www.evanmiller.org/attention-is-off-by-one.html) hypothesis.
 MosaicML claims that with their recipe you can [pretrain BERT from scratch for $20](https://www.mosaicml.com/blog/mosaicbert).
-As such, I will test the hypothesis by generalizing their implementation of [BERT](https://github.com/mosaicml/examples/tree/main/examples/benchmarks/bert) to use my implementation of [FlashAttention with Softmax_n](https://github.com/softmax1/FlashAttention-with-Softmax1).
+As such, I will test the hypothesis by generalizing their implementation of [BERT](https://github.com/mosaicml/examples/tree/main/examples/benchmarks/bert) to use my implementation of [Flash Attention with SoftmaxN](https://github.com/softmax1/Flash-Attention-Softmax-N).
 
 ## Training Dataset
 I train on the [Colossal, Cleaned, Common Crawl](https://huggingface.co/datasets/c4) (C4) dataset.

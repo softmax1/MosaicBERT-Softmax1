@@ -48,9 +48,9 @@ from torch.nn.modules.utils import consume_prefix_in_state_dict_if_present
 from transformers.activations import ACT2FN
 from transformers.modeling_outputs import MaskedLMOutput
 from transformers.models.bert.modeling_bert import BertPreTrainedModel
+from flash_attention_softmax_n import flash_attention_n
 
 import src.bert_padding as bert_padding_module
-from src.flash_attn import flash_attention_n
 
 logger = logging.getLogger(__name__)
 
