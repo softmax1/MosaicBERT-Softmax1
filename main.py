@@ -5,7 +5,8 @@
 
 import os
 import sys
-from typing import Optional, cast
+from typing import Optional, cast, Dict, Any
+from pathlib import Path
 
 import src.mosaic_bert as mosaic_bert_module
 import src.text_data as text_data_module
@@ -17,6 +18,10 @@ from composer.optim.scheduler import ConstantWithWarmupScheduler, CosineAnnealin
 from composer.utils import dist, reproducibility
 from omegaconf import DictConfig
 from omegaconf import OmegaConf as om
+from huggingface_hub import login, logout, HfApi
+from pandas import DataFrame
+from dotenv import load_dotenv
+from flash_attention_softmax_n.analysis import register_activation_hooks, compute_weight_statistics, save_results
 
 
 def update_batch_size_info(cfg: DictConfig):
@@ -138,6 +143,15 @@ def build_model(cfg: DictConfig):
         raise ValueError(f'Not sure how to build model with name={cfg.name}')
 
 
+def summarize_stats(stats: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+    stats_df = DataFrame.from_dict(stats, orient='index')
+    stats_df = stats_df.reset_index(names='name')
+    stats_df['name'] = stats_df['name'].str.replace(r'[0-9]+', '', regex=True)
+    stats_summary_df = stats_df.groupby('name').agg(['mean', 'std'])
+    stats_summary_df.columns = [' '.join(col).strip() for col in stats_summary_df.columns.values]
+    return stats_summary_df.dropna().to_dict(orient='index')
+
+
 def main(cfg: DictConfig,
          return_trainer: bool = False,
          do_train: bool = True) -> Optional[Trainer]:
@@ -153,6 +167,8 @@ def main(cfg: DictConfig,
     model = build_model(cfg.model)
     n_params = sum(p.numel() for p in model.parameters())
     print(f'{n_params=:.4e}')
+
+    activation_stats = register_activation_hooks(model)
 
     # Dataloaders
     print('Building train loader...')
@@ -236,11 +252,47 @@ def main(cfg: DictConfig,
         print('Starting training...')
         trainer.fit()
 
+    weight_stats = compute_weight_statistics(model)
+
+    activation_stats_summary = summarize_stats(activation_stats)
+    weight_stats_summary = summarize_stats(weight_stats)
+
+    n = int(cfg.model.model_config.softmax_n_param)
+    model_name = f"mosaic-bert-softmax{n}"
+    repo_id = f"{os.getenv('HUGGINGFACE_USER')}/{model_name}"
+    results_dir = Path.cwd() / "results"
+
+    save_results({
+        'activations': activation_stats,
+        'weights': weight_stats,
+        'activations_summary': activation_stats_summary,
+        'weights_summary': weight_stats_summary
+    }, model_name)
+
+    try:
+        token = os.getenv("HUGGINGFACE_TOKEN")
+        login(token=token)
+
+        model.model.push_to_hub(repo_id=repo_id)
+
+        api = HfApi()
+        results_path = results_dir / f"{model_name}.json"
+        api.upload_file(
+            path_or_fileobj=results_path,
+            path_in_repo="results.json",
+            repo_id=repo_id,
+        )
+    except ValueError:
+        model.model.save_pretrained(save_directory=results_dir)
+    finally:
+        logout()
+
     if return_trainer:
         return trainer
 
 
 if __name__ == '__main__':
+    load_dotenv()
     yaml_path, args_list = sys.argv[1], sys.argv[2:]
     with open(yaml_path) as f:
         yaml_cfg = om.load(f)

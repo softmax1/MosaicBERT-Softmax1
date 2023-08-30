@@ -1,10 +1,13 @@
-einops==0.6.1
-flash-attention-softmax-n==0.1.2
+flash-attention-softmax-n==0.2.1
 mosaicml[nlp]==0.15.1
 mosaicml-streaming==0.5.2
 omegaconf==2.3.0
+python-dotenv==1.0.0
 torch==2.0.1
 transformers==4.30.2
 datasets==2.14.4
+einops==0.6.1
+huggingface_hub==0.16.4
 numpy==1.24.4
+pandas==2.0.3
 tqdm==4.66.1
