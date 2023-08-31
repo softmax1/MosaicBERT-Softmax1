@@ -67,8 +67,6 @@ def build_algorithm(name, kwargs):
         return algorithms.GradientClipping(**kwargs)
     elif name == 'alibi':
         return algorithms.Alibi(**kwargs)
-    elif name == 'fused_layernorm':
-        return algorithms.FusedLayerNorm(**kwargs)
     elif name == 'gated_linear_units':
         return algorithms.GatedLinearUnits(**kwargs)
     elif name == 'low_precision_layernorm':
@@ -204,12 +202,10 @@ def main(cfg: DictConfig,
     ]
 
     # Algorithms
-    """
     algorithms = [
         build_algorithm(name, algorithm_cfg)
         for name, algorithm_cfg in cfg.get('algorithms', {}).items()
     ]
-    """
 
     if cfg.get('run_name') is None:
         cfg.run_name = os.environ.get('COMPOSER_RUN_NAME', 'bert')
@@ -221,7 +217,7 @@ def main(cfg: DictConfig,
         run_name=cfg.run_name,
         seed=cfg.seed,
         model=model,
-        # algorithms=algorithms,
+        algorithms=algorithms,
         train_dataloader=train_loader,
         eval_dataloader=eval_loader,
         train_subset_num_batches=cfg.get('train_subset_num_batches', -1),
