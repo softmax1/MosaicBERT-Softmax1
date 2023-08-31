@@ -264,7 +264,9 @@ def main(cfg: DictConfig,
         'activations': activation_stats,
         'weights': weight_stats,
         'activations_summary': activation_stats_summary,
-        'weights_summary': weight_stats_summary
+        'weights_summary': weight_stats_summary,
+        'train_metrics': trainer.state.train_metrics,
+        'eval_metrics': trainer.state.eval_metrics
     }, model_name)
 
     try:
