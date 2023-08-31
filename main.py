@@ -7,6 +7,7 @@ import os
 import sys
 from typing import Optional, cast, Dict, Any
 from pathlib import Path
+from time import time
 
 import src.mosaic_bert as mosaic_bert_module
 import src.text_data as text_data_module
@@ -248,8 +249,10 @@ def main(cfg: DictConfig,
 
     if do_train:
         print('Starting training...')
+        training_start_epoch = time()
         trainer.fit()
-
+        training_time = time() - training_start_epoch
+        
     weight_stats = compute_weight_statistics(model)
 
     activation_stats_summary = summarize_stats(activation_stats)
@@ -265,8 +268,9 @@ def main(cfg: DictConfig,
         'weights': weight_stats,
         'activations_summary': activation_stats_summary,
         'weights_summary': weight_stats_summary,
-        'train_metrics': trainer.state.train_metrics,
-        'eval_metrics': trainer.state.eval_metrics
+        'train_metrics': trainer.state.train_metric_values,
+        'eval_metrics': trainer.state.eval_metric_values,
+        'miscellaneous': {'training_time': training_time, 'n_params': n_params}
     }, model_name)
 
     try:
