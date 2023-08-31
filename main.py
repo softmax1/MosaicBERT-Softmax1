@@ -13,7 +13,7 @@ import src.mosaic_bert as mosaic_bert_module
 import src.text_data as text_data_module
 from composer import Trainer, algorithms
 from composer.callbacks import HealthChecker, LRMonitor, MemoryMonitor, OptimizerMonitor, RuntimeEstimator, SpeedMonitor
-from composer.loggers import WandBLogger
+from composer.loggers import WandBLogger, InMemoryLogger
 from composer.optim import DecoupledAdamW
 from composer.optim.scheduler import ConstantWithWarmupScheduler, CosineAnnealingWithWarmupScheduler, LinearWithWarmupScheduler
 from composer.utils import dist, reproducibility
@@ -97,6 +97,8 @@ def build_callback(name, kwargs):
 def build_logger(name, kwargs):
     if name == 'wandb':
         return WandBLogger(**kwargs)
+    elif name == 'in_memory':
+        return InMemoryLogger()
     else:
         raise ValueError(f'Not sure how to build logger: {name}')
 
@@ -252,6 +254,8 @@ def main(cfg: DictConfig,
         training_start_epoch = time()
         trainer.fit()
         training_time = time() - training_start_epoch
+    else:
+        training_time = 0.
         
     weight_stats = compute_weight_statistics(model)
 
@@ -268,8 +272,7 @@ def main(cfg: DictConfig,
         'weights': weight_stats,
         'activations_summary': activation_stats_summary,
         'weights_summary': weight_stats_summary,
-        'train_metrics': trainer.state.train_metric_values,
-        'eval_metrics': trainer.state.eval_metric_values,
+        'log': trainer.logger.destinations[0].data,
         'miscellaneous': {'training_time': training_time, 'n_params': n_params}
     }, model_name)
 

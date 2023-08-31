@@ -92,3 +92,6 @@ callbacks:
   speed_monitor:
     window_size: 500
   lr_monitor: {}
+
+loggers:
+  in_memory: {}
