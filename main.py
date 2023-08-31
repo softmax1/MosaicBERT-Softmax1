@@ -267,14 +267,16 @@ def main(cfg: DictConfig,
     repo_id = f"{os.getenv('HUGGINGFACE_USER')}/{model_name}"
     results_dir = Path.cwd() / "results"
 
-    save_results({
+    log = trainer.logger.destinations[0].most_recent_values
+    results = {
         'activations': activation_stats,
         'weights': weight_stats,
         'activations_summary': activation_stats_summary,
         'weights_summary': weight_stats_summary,
-        'log': trainer.logger.destinations[0].data,
-        'miscellaneous': {'training_time': training_time, 'n_params': n_params}
-    }, model_name)
+        'log': {key: val.item() if key.startswith('metric') else val for key, val in log.items()},
+        'miscellaneous': {'training_time': training_time, 'n_params': n_params, 'softmax_n_param': cfg.model.model_config.softmax_n_param}
+    }
+    save_results(results, model_name)
 
     try:
         token = os.getenv("HUGGINGFACE_TOKEN")
