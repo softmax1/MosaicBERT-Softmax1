@@ -70,7 +70,7 @@ optimizer:
   weight_decay: 1.0e-5 # Amount of weight decay regularization
 
 algorithms:
-  alibi: {}
+  alibi: {'max_sequence_length': 512}
   gated_linear_units: {}
   low_precision_layernorm: {}
 
