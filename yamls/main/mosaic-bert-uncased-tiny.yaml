@@ -70,19 +70,17 @@ optimizer:
   weight_decay: 1.0e-5 # Amount of weight decay regularization
 
 algorithms:
-  alibi: {'max_sequence_length': 512}
-  gated_linear_units: {}
   low_precision_layernorm: {}
 
 max_duration: 4096sp # Subsample the training data for ~4k samples
 eval_interval: 4096sp
-global_train_batch_size: 4096
+global_train_batch_size: 128
 
 # System
 seed: 17
 device_eval_batch_size: 128
-# device_train_microbatch_size: 128
-device_train_microbatch_size: auto
+device_train_microbatch_size: 128
+# device_train_microbatch_size: auto
 precision: amp_bf16
 
 # Logging
