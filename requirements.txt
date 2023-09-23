@@ -1,4 +1,4 @@
-flash-attention-softmax-n==0.2.1
+flash-attention-softmax-n>=0.3.1
 mosaicml[nlp]==0.15.1
 mosaicml-streaming==0.5.2
 omegaconf==2.3.0
